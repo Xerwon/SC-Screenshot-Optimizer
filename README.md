@@ -97,10 +97,9 @@ Run:
 You should see:
 
 - `TaskName: \SC Screenshot Optimizer`
-- `Next Run Time: At log on` (or a concrete upcoming time)
+- `Status: is running`
 - `Run as User: <your user>`
 - `Logon Mode: Interactive/Background` (wording varies)
-- `Last Run Result: 0` (this means “success”)
 
 You should **NOT** see:
 
@@ -116,10 +115,11 @@ Run:
 
 You should see:
 - The command returns quickly (no error).
-- Your script starts in the background (no visible window due to `-WindowStyle Hidden`).
+- `INFORMATION: The scheduled task “SC Screenshot Optimizer” is currently running.`
+- `SUCCESS: An attempt was made to execute the scheduled task “SC Screenshot Optimizer.”`
 - The log file is created/updated:
-- If your script logs to `%LOCALAPPDATA%`:
-- `%LOCALAPPDATA%\SC_Screenshot_Optimizer.log`
+  - If your script logs to `%LOCALAPPDATA%`:
+  - `%LOCALAPPDATA%\SC_Screenshot_Optimizer.log`
 - If you changed it to the script folder, check there instead.
 - Log contains lines like:
   - `Polling started: D:\StarCitizen\PTU\screenshots, ...`
