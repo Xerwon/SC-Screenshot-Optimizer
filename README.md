@@ -101,7 +101,7 @@ You should see:
 - `Logon Mode: Interactive/Background` (wording varies)
 - `Last Run Result: 0` (this means “success”)
 
-You should NOT see:
+You should **NOT** see:
 
 - `ERROR: The system cannot find the file specified.` → Wrong -ScriptPath in install.
 - `Last Run Result: 0x1` or other non-zero codes → Usually quoting/permissions/path issues.
