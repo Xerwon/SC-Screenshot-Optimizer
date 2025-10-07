@@ -1,0 +1,19 @@
+📦 Installation
+
+Place the script, e.g.:
+
+C:\Tools\SC\SC-Screenshot-Optimizer.ps1
+
+
+Open the script and set your screenshot paths:
+
+[string[]]$Sources = @(
+  "D:\StarCitizen\LIVE\screenshots",
+  "D:\StarCitizen\PTU\screenshots"
+)
+
+
+(Optional) adjust image quality or max width:
+
+[int]$MaxWidth = 2560
+[int]$Quality  = 82
