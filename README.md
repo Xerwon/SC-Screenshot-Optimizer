@@ -48,7 +48,6 @@ Open the script and set your screenshot paths:
 
 `[int]$Quality  = 82`
 
----
 
 ## ▶️ Manual Run
 
@@ -56,12 +55,12 @@ Open the script and set your screenshot paths:
 
 Keep the PowerShell window open — it will poll the folder every 2 seconds and optimize new screenshots.
 
- ---
 
 ## 🚀 Autostart (Recommended)
 
 You can make the optimizer run automatically every time you log in to Windows —
 no need to keep PowerShell open manually.
+
 
 ### 🔧 Install the Autostart Task
 
@@ -86,7 +85,9 @@ no need to keep PowerShell open manually.
 ✅ This creates the Windows scheduled task
 “SC Screenshot Optimizer” that runs automatically on every login — hidden and elevated.
 
+
 ### 🧪 Verify & Test — What to expect
+
 ✅ Verify (after installing the task)
 
 1️⃣ Open PowerShell as Administrator
@@ -131,6 +132,7 @@ You should NOT see:
 - Repeated `FAIL:` or `DEL FAIL:` lines (indicates conversion/permissions issues).
 - `.jpg` files staying forever alongside `.webp` after a fresh screenshot (means conversion or delete failed).
 
+
 ### 🧰 Quick live test (without launching the game)
 
 **1.** Make a dummy file in a watched folder:
@@ -147,6 +149,7 @@ You should NOT see:
   - Check that the folder path in your optimizer script matches the one you’re testing.
   - Run magick -version in PowerShell to ensure ImageMagick is on PATH.
   - Open the log and look for FAIL messages (quoting them in an issue helps).
+
 
 ### 🚨 Common pitfalls & fixes
 
@@ -173,7 +176,9 @@ You should NOT see:
    - Reinstall from an elevated PowerShell opened under the intended account.
    - In Task Scheduler, confirm “**Run only when user is logged on**” (for debugging) and “**Run with highest privileges.**”
 
-### 🧹 Uninstall
+---
+
+## 🧹 Uninstall
 
 `.\uninstall-task.ps1 -StopRunning`
 
