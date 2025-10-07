@@ -44,8 +44,9 @@ Open the script and set your screenshot paths:
 
 (Optional) adjust image quality or max width:
 
-`[int]$MaxWidth = 2560
-[int]$Quality  = 82`
+`[int]$MaxWidth = 2560`
+
+`[int]$Quality  = 82`
 
 ---
 
