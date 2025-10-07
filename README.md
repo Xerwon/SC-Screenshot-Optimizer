@@ -63,6 +63,7 @@ Keep the PowerShell window open — it will poll the folder every 2 seconds and 
 Run automatically on Windows login (invisible background task):
 
 powershell
+
 `$script = "C:\Tools\SC\SC_Screenshot_Optimizer.ps1"
 schtasks /Create /TN "SC Screenshot Optimizer" 
   /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$script" -Sources "D:\StarCitizen\PTU\screenshots" -MaxWidth 2560 -Quality 82"
