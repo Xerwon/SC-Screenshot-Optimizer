@@ -60,18 +60,63 @@ Keep the PowerShell window open — it will poll the folder every 2 seconds and 
 
 ## 🚀 Autostart (Recommended)
 
-Run automatically on Windows login (invisible background task):
+You can make the optimizer run automatically every time you log in to Windows —
+no need to keep PowerShell open manually.
 
-powershell
+### 🔧 Variant 1 – Install the Autostart Task
 
-`$script = "C:\Tools\SC\SC_Screenshot_Optimizer.ps1"
-schtasks /Create /TN "SC Screenshot Optimizer" 
-  /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "$script" -Sources "D:\StarCitizen\PTU\screenshots" -MaxWidth 2560 -Quality 82"
-  /SC ONLOGON /RL HIGHEST /F`
+Use the included helper script `install-task.ps1`.
+It creates (or updates) a Windows Scheduled Task that launches the optimizer invisibly at login with elevated privileges.
+
+.\scripts\install-task.ps1 `
+  -ScriptPath "C:\Tools\SC\SC_Screenshot_Optimizer.ps1" `
+  -Sources "D:\StarCitizen\PTU\screenshots","D:\StarCitizen\LIVE\screenshots" `
+  -MaxWidth 2560 `
+  -Quality 82
+
+
+✅ What this does
+
+Registers the task “SC Screenshot Optimizer” in Windows Task Scheduler
+
+Trigger: At log on
+
+Runs PowerShell hidden and with highest privileges
+
+Starts the optimizer once immediately for testing
+
+Requests administrator rights automatically (UAC prompt)
+
+### 🧹 Variant 2 – Uninstall the Task
+
+If you want to remove the background task later —
+for example when changing your folder setup — run:
+
+.\scripts\uninstall-task.ps1 -TaskName "SC Screenshot Optimizer" -StopRunning
+
+
+✅ What this does
+
+Stops any currently running instance (optional with -StopRunning)
+
+Deletes the task from Windows Task Scheduler
+
+Requests elevation automatically if needed
+
+### 🧪 Test and Verify
+
+Run the task manually (no restart required):
+
+schtasks /Run /TN "SC Screenshot Optimizer"
+
+
+Check task details and last run time:
+
+schtasks /Query /TN "SC Screenshot Optimizer" /V /FO LIST
 
 ---
 
-# 🧪 Example Results
+## 🧪 Example Results
 Original	Optimized (WebP)	File Size
 
 `14 MB (JPG)	1.1 MB (WebP 82 %)	− 92 %`
@@ -82,7 +127,7 @@ Visually identical — ideal for web, Discord, and report uploads.
 
 ---
 
-# 🗒 Log File
+## 🗒 Log File
 
 All activity is logged to:
 
