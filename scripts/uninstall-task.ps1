@@ -1,9 +1,9 @@
 param(
   [string]$TaskName = "SC Screenshot Optimizer",
-  [switch]$StopRunning                          # optional: laufende Instanz beenden
+  [switch]$StopRunning                          # optional: stop a running instance first
 )
 
-# --- UAC: Selbstelevation ---
+# --- UAC: Self-Elevation ---
 $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 if (-not $IsAdmin) {
   Write-Host "Requesting elevation..."
@@ -15,7 +15,7 @@ if (-not $IsAdmin) {
   exit
 }
 
-# Optional laufende Instanz beenden (rudimentär über Aufgabenplanung)
+# --- Optionally stop any running instance (basic Task Scheduler stop) ---
 if ($StopRunning) {
   try {
     $null = schtasks /End /TN "$TaskName" 2>$null
@@ -25,7 +25,7 @@ if ($StopRunning) {
   }
 }
 
-# Task löschen
+# --- Delete the scheduled task ---
 try {
   $out = schtasks /Delete /TN "$TaskName" /F 2>&1
   Write-Host "Task '$TaskName' removed."
