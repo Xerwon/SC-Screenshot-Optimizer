@@ -63,56 +63,146 @@ Keep the PowerShell window open — it will poll the folder every 2 seconds and 
 You can make the optimizer run automatically every time you log in to Windows —
 no need to keep PowerShell open manually.
 
-### 🔧 Variant 1 – Install the Autostart Task
-
-Use the included helper script `install-task.ps1`.
-It creates (or updates) a Windows Scheduled Task that launches the optimizer invisibly at login with elevated privileges.
-
-.\scripts\install-task.ps1 `
-  -ScriptPath "C:\Tools\SC\SC_Screenshot_Optimizer.ps1" `
-  -Sources "D:\StarCitizen\PTU\screenshots","D:\StarCitizen\LIVE\screenshots" `
-  -MaxWidth 2560 `
-  -Quality 82
+### 🔧 Install the Autostart Task
 
 
-✅ What this does
+1️⃣ Open PowerShell as Administrator
 
-Registers the task “SC Screenshot Optimizer” in Windows Task Scheduler
+2️⃣ Change directory
 
-Trigger: At log on
-
-Runs PowerShell hidden and with highest privileges
-
-Starts the optimizer once immediately for testing
-
-Requests administrator rights automatically (UAC prompt)
-
-### 🧹 Variant 2 – Uninstall the Task
-
-If you want to remove the background task later —
-for example when changing your folder setup — run:
-
-.\scripts\uninstall-task.ps1 -TaskName "SC Screenshot Optimizer" -StopRunning
+`cd "C:\Tools\SC"`
 
 
-✅ What this does
+3️⃣ Unblock downloaded scripts
 
-Stops any currently running instance (optional with -StopRunning)
-
-Deletes the task from Windows Task Scheduler
-
-Requests elevation automatically if needed
-
-### 🧪 Test and Verify
-
-Run the task manually (no restart required):
-
-schtasks /Run /TN "SC Screenshot Optimizer"
+`Get-ChildItem . | Unblock-File`
 
 
-Check task details and last run time:
+4️⃣ Run the installer
 
-schtasks /Query /TN "SC Screenshot Optimizer" /V /FO LIST
+`.\install-task.ps1 -ScriptPath "C:\Tools\SC\SC_Screenshot_Optimizer.ps1"`
+
+
+✅ This creates the Windows scheduled task
+“SC Screenshot Optimizer” that runs automatically on every login — hidden and elevated.
+
+### 🧪 🧪 Verify & Test — What to expect
+✅ Verify (after installing the task)
+
+1️⃣ Open PowerShell as Administrator
+Run:
+`schtasks /Query /TN "SC Screenshot Optimizer" /V /FO LIST`
+
+You should see:
+
+- `TaskName: \SC Screenshot Optimizer`
+- `Next Run Time: At log on` (or a concrete upcoming time)
+- `Run as User: <your user>`
+- `Logon Mode: Interactive/Background` (wording varies)
+- `Last Run Result: 0` (this means “success”)
+
+You should NOT see:
+
+- `ERROR: The system cannot find the file specified.` → Wrong -ScriptPath in install.
+- `Last Run Result: 0x1` or other non-zero codes → Usually quoting/permissions/path issues.
+- A different user in `Run as User` (e.g., SYSTEM) unless you intended that.
+
+▶️ Test (start it manually)
+1️⃣ Open PowerShell as Administrator
+Run:
+`schtasks /Run /TN "SC Screenshot Optimizer"`
+
+You should see:
+
+- The command returns quickly (no error).
+- Your script starts in the background (no visible window due to `-WindowStyle Hidden`).
+- The log file is created/updated:
+    - If your script logs to `%LOCALAPPDATA%`:
+    `%LOCALAPPDATA%\SC_Screenshot_Optimizer.log`
+- If you changed it to the script folder, check there instead.
+
+- Log contains lines like:
+  - `Polling started: D:\StarCitizen\PTU\screenshots, ...`
+  - `OK : <name>.webp` after you create a fresh JPG/PNG in a watched folder.
+
+You should NOT see:
+
+A blocking PowerShell window that never returns (task runs hidden; the query/ run commands should return).
+
+No log entry at all after you drop a new screenshot into the watched folder.
+
+Repeated FAIL: or DEL FAIL: lines (indicates conversion/permissions issues).
+
+.jpg files staying forever alongside .webp after a fresh screenshot (means conversion or delete failed).
+
+🧰 Quick live test (without launching the game)
+
+Make a dummy file in a watched folder:
+
+Set-Content -Path "D:\StarCitizen\PTU\screenshots\_test.jpg" -Value "x"
+
+
+Wait up to 2–3 seconds (polling interval).
+
+Expected result:
+
+_test.webp appears
+
+_test.jpg is deleted
+
+Log shows OK : _test.webp
+
+If not:
+
+Check that the folder path in your optimizer script matches the one you’re testing.
+
+Run magick -version in PowerShell to ensure ImageMagick is on PATH.
+
+Open the log and look for FAIL messages (quoting them in an issue helps).
+
+🚨 Common pitfalls & fixes
+
+No log file appears
+
+You’re looking in the wrong place (different user account or different log path).
+
+The task didn’t actually start. Re-run schtasks /Run /TN ... and query status.
+
+If you run the task as SYSTEM, the log may be under the SYSTEM profile.
+
+“Last Run Result: 0x1”
+
+Usually bad quoting or wrong ScriptPath. Reinstall with the exact path.
+
+Ensure the script isn’t blocked: Unblock-File C:\Tools\SC\SC_Screenshot_Optimizer.ps1.
+
+Conversion doesn’t happen
+
+Verify the file extension is supported (.jpg, .jpeg, .png).
+
+Ensure magick is available: magick -version.
+
+Check the script’s $Sources actually include the folder you’re testing.
+
+Files exist but never get processed
+
+Your script uses a polling loop (default 2 seconds). Give it a moment.
+
+Check timestamps: files are only reprocessed if source is newer than target.
+
+Try with a new file: create or copy a fresh .jpg to the folder.
+
+Task created under the wrong user
+
+Reinstall from an elevated PowerShell opened under the intended account.
+
+In Task Scheduler, confirm “Run only when user is logged on” (for debugging) and “Run with highest privileges.”
+
+### 🧹 Uninstall
+
+`.\uninstall-task.ps1 -StopRunning`
+
+✅ Stops and removes the task completely.
 
 ---
 
