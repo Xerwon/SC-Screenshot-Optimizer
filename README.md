@@ -86,7 +86,7 @@ no need to keep PowerShell open manually.
 ✅ This creates the Windows scheduled task
 “SC Screenshot Optimizer” that runs automatically on every login — hidden and elevated.
 
-### 🧪 🧪 Verify & Test — What to expect
+### 🧪 Verify & Test — What to expect
 ✅ Verify (after installing the task)
 
 1️⃣ Open PowerShell as Administrator
@@ -108,95 +108,70 @@ You should NOT see:
 - A different user in `Run as User` (e.g., SYSTEM) unless you intended that.
 
 ▶️ Test (start it manually)
+
 1️⃣ Open PowerShell as Administrator
 Run:
 `schtasks /Run /TN "SC Screenshot Optimizer"`
 
 You should see:
-
 - The command returns quickly (no error).
 - Your script starts in the background (no visible window due to `-WindowStyle Hidden`).
 - The log file is created/updated:
-    - If your script logs to `%LOCALAPPDATA%`:
-    `%LOCALAPPDATA%\SC_Screenshot_Optimizer.log`
+- If your script logs to `%LOCALAPPDATA%`:
+- `%LOCALAPPDATA%\SC_Screenshot_Optimizer.log`
 - If you changed it to the script folder, check there instead.
-
 - Log contains lines like:
   - `Polling started: D:\StarCitizen\PTU\screenshots, ...`
   - `OK : <name>.webp` after you create a fresh JPG/PNG in a watched folder.
-
+  
 You should NOT see:
 
-A blocking PowerShell window that never returns (task runs hidden; the query/ run commands should return).
+- A blocking PowerShell window that never returns (task runs hidden; the query/ run commands should return).
+- No log entry at all after you drop a new screenshot into the watched folder.
+- Repeated `FAIL:` or `DEL FAIL:` lines (indicates conversion/permissions issues).
+- `.jpg` files staying forever alongside `.webp` after a fresh screenshot (means conversion or delete failed).
 
-No log entry at all after you drop a new screenshot into the watched folder.
+### 🧰 Quick live test (without launching the game)
 
-Repeated FAIL: or DEL FAIL: lines (indicates conversion/permissions issues).
+**1.** Make a dummy file in a watched folder:
+   `Set-Content -Path "D:\StarCitizen\PTU\screenshots\_test.jpg" -Value "x"`
+   
+**2.** Wait up to 2–3 seconds (polling interval).
 
-.jpg files staying forever alongside .webp after a fresh screenshot (means conversion or delete failed).
+**3. Expected result:**
+  - `_test.webp` appears
+  - `_test.jpg` is deleted
+  - Log shows `OK : _test.webp`
 
-🧰 Quick live test (without launching the game)
+**4. If not:**
+  - Check that the folder path in your optimizer script matches the one you’re testing.
+  - Run magick -version in PowerShell to ensure ImageMagick is on PATH.
+  - Open the log and look for FAIL messages (quoting them in an issue helps).
 
-Make a dummy file in a watched folder:
+### 🚨 Common pitfalls & fixes
 
-Set-Content -Path "D:\StarCitizen\PTU\screenshots\_test.jpg" -Value "x"
+- **No log file appears**
+  - You’re looking in the wrong place (different user account or different log path).
+  - The task didn’t actually start. Re-run `schtasks /Run /TN ...` and query status.
+  - If you run the task as SYSTEM, the log may be under the SYSTEM profile.
+   
+- **“Last Run Result: 0x1”**
+   - Usually bad quoting or wrong `ScriptPath`. Reinstall with the exact path.
+   - Ensure the script isn’t blocked: `Unblock-File C:\Tools\SC\SC_Screenshot_Optimizer.ps1`.
+    
+- **Conversion doesn’t happen**
+   - Verify the file extension is supported (`.jpg`, `.jpeg`, `.png`).
+   - Ensure `magick` is available: `magick -version`.
+   - Check the script’s $Sources actually include the folder you’re testing.
+    
+- **Files exist but never get processed**
+   - Your script uses a **polling loop** (default 2 seconds). Give it a moment.
+   - Check timestamps: files are only reprocessed if source is newer than target.
+   - Try with a new file: create or copy a fresh `.jpg` to the folder.
 
-
-Wait up to 2–3 seconds (polling interval).
-
-Expected result:
-
-_test.webp appears
-
-_test.jpg is deleted
-
-Log shows OK : _test.webp
-
-If not:
-
-Check that the folder path in your optimizer script matches the one you’re testing.
-
-Run magick -version in PowerShell to ensure ImageMagick is on PATH.
-
-Open the log and look for FAIL messages (quoting them in an issue helps).
-
-🚨 Common pitfalls & fixes
-
-No log file appears
-
-You’re looking in the wrong place (different user account or different log path).
-
-The task didn’t actually start. Re-run schtasks /Run /TN ... and query status.
-
-If you run the task as SYSTEM, the log may be under the SYSTEM profile.
-
-“Last Run Result: 0x1”
-
-Usually bad quoting or wrong ScriptPath. Reinstall with the exact path.
-
-Ensure the script isn’t blocked: Unblock-File C:\Tools\SC\SC_Screenshot_Optimizer.ps1.
-
-Conversion doesn’t happen
-
-Verify the file extension is supported (.jpg, .jpeg, .png).
-
-Ensure magick is available: magick -version.
-
-Check the script’s $Sources actually include the folder you’re testing.
-
-Files exist but never get processed
-
-Your script uses a polling loop (default 2 seconds). Give it a moment.
-
-Check timestamps: files are only reprocessed if source is newer than target.
-
-Try with a new file: create or copy a fresh .jpg to the folder.
-
-Task created under the wrong user
-
-Reinstall from an elevated PowerShell opened under the intended account.
-
-In Task Scheduler, confirm “Run only when user is logged on” (for debugging) and “Run with highest privileges.”
+- **Task created under the wrong user**
+   - Reinstall from an elevated PowerShell opened under the intended account.
+   - In Task Scheduler, confirm “**Run only when user is logged on**” (for debugging) and “**Run with highest privileges.**”
 
 ### 🧹 Uninstall
 
