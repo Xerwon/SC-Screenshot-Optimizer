@@ -1,13 +1,13 @@
 param(
   [string[]]$Sources =@(
   "D:\StarCitizen\PTU\screenshots",
-  "D:\StarCitizen\LIVE\screenshots" # weitere Ordner hier ergänzen
+  "D:\StarCitizen\LIVE\screenshots" # add more folders here
 ),  
-  [int]$MaxWidth = 2560,  # 0 = keine Skalierung
-  [int]$Quality  = 82     # 78–85 ist gut
+  [int]$MaxWidth = 2560,  # 0 = no resizing
+  [int]$Quality  = 82     # 78–85 is a good sweet spot
 )
 
-# --- ImageMagick finden (PS 5.1 kompatibel) ---
+# --- Locate ImageMagick (compatible with Windows PowerShell 5.1) ---
 $MagickCmd = $null
 $cmd = Get-Command magick -ErrorAction SilentlyContinue
 if ($cmd) { $MagickCmd = $cmd.Source }
